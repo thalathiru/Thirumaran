@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PinusX — Full-Stack Ramp-Up Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6FA;
+  --surface:#FFFFFF;
+  --ink:#0F1C2E;
+  --muted:#5A6B80;
+  --line:#DBE3EC;
+  --accent:#2F4BD8;
+  --accent-soft:#E6EAFD;
+  --signal:#0E7F63;
+  --gate:#9A5B00;
+  --gate-soft:#FDF0DC;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0C1420;--surface:#141F2E;--ink:#E7EEF6;--muted:#93A4B8;--line:#26354A;
+    --accent:#7C93FF;--accent-soft:#1B2847;--signal:#4FC2A0;
+    --gate:#E0A94A;--gate-soft:#33280F;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.6;
+}
+a{color:var(--accent)}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px 90px}
+
+/* ---------- Masthead ---------- */
+.masthead{padding:52px 0 8px}
+.org{font-family:var(--mono);font-weight:600;font-size:.82rem;letter-spacing:.14em;color:var(--accent);margin:0 0 14px}
+h1{font-weight:700;font-size:clamp(2rem,5.4vw,2.9rem);line-height:1.1;letter-spacing:-.02em;margin:0 0 16px}
+.standfirst{max-width:62ch;margin:0;color:var(--muted);font-size:1.07rem}
+
+/* ---------- Progress ---------- */
+.tracker{
+  margin-top:30px;background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;padding:22px 24px;
+}
+.tracker-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.tally{font-family:var(--mono);font-weight:600;font-size:2.1rem;line-height:1;color:var(--ink)}
+.tally small{color:var(--muted);font-size:1rem;font-weight:500}
+.stance{margin:0;text-align:right;font-size:.95rem;color:var(--muted);max-width:40ch}
+.rail{margin-top:16px;height:8px;background:var(--accent-soft);border-radius:99px;overflow:hidden}
+.rail i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease}
+
+/* ---------- House rules ---------- */
+.house{margin:30px 0 4px;border-left:3px solid var(--accent);padding:4px 0 4px 20px}
+.house h2{font-size:1.1rem;margin:0 0 10px;letter-spacing:-.01em}
+.house ul{margin:0;padding:0;list-style:none}
+.house li{margin:7px 0;color:var(--muted);font-size:.97rem}
+.house b{color:var(--ink);font-weight:600}
+
+/* ---------- Stages ---------- */
+.plan{margin-top:40px}
+.stage{position:relative;padding-left:62px;padding-bottom:40px}
+.stage::before{
+  content:"";position:absolute;left:21px;top:48px;bottom:4px;width:2px;
+  background:var(--line);
+}
+.stage:last-child::before{display:none}
+.stage.sealed::before{background:var(--signal)}
+.pin{
+  position:absolute;left:0;top:0;width:44px;height:44px;border-radius:12px;
+  background:var(--surface);border:2px solid var(--line);
+  display:grid;place-items:center;
+  font-family:var(--mono);font-weight:600;font-size:1.05rem;color:var(--muted);
+}
+.stage.sealed .pin{background:var(--signal);border-color:var(--signal);color:#fff}
+.stage h2{font-size:1.42rem;font-weight:700;letter-spacing:-.015em;margin:6px 0 0}
+.goal{margin:8px 0 6px;color:var(--muted);max-width:60ch}
+.stage h3{font-size:.95rem;font-weight:600;color:var(--muted);margin:18px 0 8px}
+
+.item{
+  display:flex;gap:14px;align-items:flex-start;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;margin-bottom:9px;
+}
+.item.ticked{border-color:var(--signal)}
+.item input{
+  appearance:none;-webkit-appearance:none;flex:none;
+  width:24px;height:24px;margin:2px 0 0;background:var(--surface);
+  border:2px solid var(--muted);border-radius:7px;cursor:pointer;display:grid;place-items:center;
+}
+.item input:checked{background:var(--signal);border-color:var(--signal)}
+.item input:checked::after{
+  content:"";width:6px;height:12px;border:solid #fff;border-width:0 3px 3px 0;
+  transform:rotate(45deg) translate(-1px,-1px);
+}
+.item input:focus-visible,.open:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.item .body{flex:1;min-width:0}
+.item label{display:block;font-weight:600;cursor:pointer;line-height:1.4}
+.item.ticked label{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--signal)}
+.item p{margin:4px 0 0;font-size:.94rem;color:var(--muted)}
+.item .by{font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--muted);margin-top:3px}
+.item.video{border-left:3px solid var(--accent)}
+.item.video.ticked{border-left-color:var(--signal)}
+.open{
+  flex:none;align-self:center;text-decoration:none;font-weight:600;font-size:.9rem;
+  padding:8px 14px;border-radius:9px;background:var(--accent);color:#fff;white-space:nowrap;
+}
+@media (prefers-color-scheme:dark){.open{color:#0C1420}}
+.open:hover{filter:brightness(1.1)}
+
+.gate{
+  margin-top:16px;background:var(--gate-soft);border-radius:12px;
+  padding:14px 18px;font-size:.96rem;
+}
+.gate b{display:block;font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;color:var(--gate);margin-bottom:5px}
+
+/* ---------- Footer ---------- */
+footer{margin-top:16px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.93rem}
+footer p{margin:0 0 14px;max-width:66ch}
+.reset{
+  font:inherit;font-size:.89rem;background:none;border:1px solid var(--line);
+  color:var(--muted);padding:7px 14px;border-radius:9px;cursor:pointer;
+}
+.reset:hover{border-color:var(--muted)}
+
+@media (max-width:560px){
+  body{font-size:16px}
+  .stage{padding-left:50px}
+  .pin{width:36px;height:36px;border-radius:10px;font-size:.95rem}
+  .stage::before{left:17px;top:40px}
+  .stance{text-align:left}
+  .item{flex-wrap:wrap}
+  .item .body{flex-basis:calc(100% - 38px)}
+  .open{margin-left:38px;align-self:flex-start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="org">PINUSX AI</p>
+    <h1>Full-stack ramp-up plan</h1>
+    <p class="standfirst">Your path from first commit to shipping client work on your own. Work through the stages in order: watch the videos, do the practice, then walk your mentor through what you built before you start the next stage.</p>
+
+    <div class="tracker" aria-live="polite">
+      <div class="tracker-top">
+        <div class="tally"><span id="doneCount">0</span><small> / <span id="totalCount">0</span> steps done</small></div>
+        <p class="stance" id="stanceMsg">Start at Stage 0. Get the environment running before anything else.</p>
+      </div>
+      <div class="rail" aria-hidden="true"><i id="railFill"></i></div>
+    </div>
+  </header>
+
+  <section class="house">
+    <h2>How we work</h2>
+    <ul>
+      <li><b>Code along with every video.</b> Pause and type it yourself. Watching without typing does not count as done.</li>
+      <li><b>Push your code as you go.</b> Small commits on a branch, even when the work is unfinished.</li>
+      <li><b>Stuck for 30 minutes? Ask.</b> Bring what you tried and the exact error.</li>
+      <li><b>Nothing secret in the repo.</b> Connection strings, keys and tokens go in user secrets or environment config.</li>
+    </ul>
+  </section>
+
+  <main class="plan" id="plan"></main>
+
+  <footer>
+    <p>Your ticks are saved in this browser only, so open this page on the same machine each time. Tick a step when you can do it without following the guide.</p>
+    <p>Stack: .NET 10, C# 14, ASP.NET Core, Entity Framework Core, SQL Server, React with TypeScript. Some videos use an older .NET or React version. The concepts are the same; where a screen or command differs, ask your mentor.</p>
+    <button class="reset" id="resetBtn" type="button">Clear all ticks</button>
+  </footer>
+</div>
+
+<script>
+const STAGES = [
+  {
+    title: "Environment, Git and access",
+    goal: "Get a working machine, learn the Git basics you will use daily, and run our main application locally.",
+    videos: [
+      { name: "Git and GitHub for Beginners — Crash Course",
+        by: "freeCodeCamp.org",
+        detail: "Commits, branches, merging and pull requests. You will use all of it from your first task.",
+        url: "https://www.youtube.com/watch?v=RGOj5yH7evk" }
+    ],
+    tasks: [
+      { name: "Install the toolchain",
+        detail: "Visual Studio 2026 with the “ASP.NET and web development” workload, the .NET 10 SDK, Node.js LTS, Git, SQL Server Developer Edition and SQL Server Management Studio." },
+      { name: "Get your accounts",
+        detail: "GitHub organisation access, email, project board and the password manager. Turn on two-factor authentication on all of them." },
+      { name: "Clone, build and run the main repo",
+        detail: "Follow the repo README. Where it is wrong or missing a step, fix the README. That is your first pull request." }
+    ],
+    gate: "Run the application locally, end to end, and walk your mentor through what each project in the solution does."
+  },
+  {
+    title: "C# and the .NET runtime",
+    goal: "Read and write everyday C# without looking up syntax: types, control flow, methods, collections, classes.",
+    videos: [
+      { name: "Learn C# — Full Course with Mini-Projects",
+        by: "freeCodeCamp.org · about 8 hours",
+        detail: "Types, operators, loops, strings, arrays, lists, dictionaries, functions, try/catch, debugging, and classes. Do every mini-project.",
+        url: "https://www.youtube.com/watch?v=YrtFtdTTfv0" },
+      { name: "C# Tutorial for Beginners (topic-by-topic series)",
+        by: "kudvenkat / Pragim",
+        detail: "Short videos, one per topic. Use it when something in the main course did not land and you want a second explanation.",
+        url: "https://csharp-video-tutorials.blogspot.com/p/free-c-video-tutorial-for-beginners.html" }
+    ],
+    tasks: [
+      { name: "Nullable reference types",
+        detail: "Understand why the compiler warns about null, and how we annotate code so it stops guessing." },
+      { name: "Solutions, projects and NuGet",
+        detail: "What a .csproj holds, how projects reference each other, and how packages are added and pinned." },
+      { name: "Build a small command-line tool",
+        detail: "Something you would use yourself: a file renamer, a CSV summariser, a log filter. Keep it under 200 lines." }
+    ],
+    gate: "Demo your command-line tool and explain, line by line, what happens when it runs."
+  },
+  {
+    title: "OOP, LINQ and async",
+    goal: "Write code that other people can change safely, and that does not block a thread while it waits.",
+    videos: [
+      { name: "Advanced C# Programming Course",
+        by: "freeCodeCamp.org",
+        detail: "Delegates, events, generics and async/await. Watch in sections, not in one sitting.",
+        url: "https://www.youtube.com/watch?v=YT8s-90oDC0" },
+      { name: "Advanced C# — LINQ Tutorial",
+        by: "freeCodeCamp.org · about 3 hours",
+        detail: "Lambda expressions, query vs method syntax, deferred execution, joins, grouping and projection.",
+        url: "https://www.youtube.com/watch?v=5l2qA3Pc83M" }
+    ],
+    tasks: [
+      { name: "Interfaces and dependency injection",
+        detail: "Learn when to use an interface, and why we inject dependencies instead of constructing them inside a class." },
+      { name: "Refactor your tool",
+        detail: "Split it behind interfaces, inject its dependencies, use LINQ where you wrote loops, and make its file or network calls async." }
+    ],
+    gate: "Submit the refactor as a pull request and take a full code review on it. Expect changes requested. That is the point."
+  },
+  {
+    title: "SQL Server and EF Core",
+    goal: "Model data properly and query it without surprises in performance.",
+    videos: [
+      { name: "Beginner to T-SQL — Full Course",
+        by: "Pragmatic Works",
+        detail: "SELECT, filtering, joins across tables and aggregates. Write every query yourself in SSMS.",
+        url: "https://www.youtube.com/watch?v=cACat4KNncg" },
+      { name: "SQL Server Tutorial for Beginners (playlist)",
+        by: "kudvenkat",
+        detail: "Go here for keys, constraints, indexes, stored procedures and transactions.",
+        url: "https://www.youtube.com/playlist?list=PL08903FB7ACA1C2FB" },
+      { name: "Entity Framework Core for Beginners (video series)",
+        by: "Microsoft Learn",
+        detail: "DbContext, migrations, querying and relationships, taught by the EF Core team.",
+        url: "https://learn.microsoft.com/en-us/shows/entity-framework-core-for-beginners" }
+    ],
+    tasks: [
+      { name: "Schema design",
+        detail: "Keys, relationships, normalisation and when indexes help." },
+      { name: "Tracking, projections and N+1",
+        detail: "When to use AsNoTracking, how to project to a DTO, and how to spot a query running once per row." }
+    ],
+    gate: "Design a small schema from a written requirement, generate it with migrations, and show the SQL that EF Core produces for your three main queries."
+  },
+  {
+    title: "ASP.NET Core Web API",
+    goal: "Build an API another team could consume without asking you questions.",
+    videos: [
+      { name: "ASP.NET Core Full Course for Beginners",
+        by: "Julio Casal",
+        detail: "REST basics, DTOs, CRUD endpoints, validation, EF Core, configuration, dependency injection, async, and connecting a front end.",
+        url: "https://www.youtube.com/watch?v=AhAxLiGC7Pc" }
+    ],
+    tasks: [
+      { name: "Error handling",
+        detail: "Consistent problem responses, and never leaking stack traces to a caller." },
+      { name: "Logging and diagnostics",
+        detail: "Structured logging, log levels, and what to log so an incident in the middle of the night is survivable." },
+      { name: "OpenAPI documentation",
+        detail: "Document every endpoint. Treat a published contract as something you cannot silently change." },
+      { name: "Tests",
+        detail: "Unit tests for logic, integration tests for endpoints against a test database." }
+    ],
+    gate: "Ship a documented REST API over your Stage 3 schema, with tests green, and have someone else call it using only your OpenAPI page."
+  },
+  {
+    title: "React and TypeScript",
+    goal: "Build the front end that consumes your own API.",
+    videos: [
+      { name: "Programming in TypeScript — Full Course",
+        by: "freeCodeCamp.org · about 5 hours",
+        detail: "Types, interfaces, classes, generics and type narrowing. Resist `any`.",
+        url: "https://www.youtube.com/watch?v=30LWjhZzg50" },
+      { name: "Learn React",
+        by: "freeCodeCamp.org · Bob Ziroll",
+        detail: "Function components, props, state, useState and useEffect, built up through projects.",
+        url: "https://www.youtube.com/watch?v=x4rFhThSX04" },
+      { name: "React and TypeScript — Course for Beginners",
+        by: "freeCodeCamp.org · about 1.5 hours",
+        detail: "Typing components, props and hooks, then a small todo app that puts the two together.",
+        url: "https://www.youtube.com/watch?v=FJDVKeh7RJI" }
+    ],
+    tasks: [
+      { name: "Data fetching states",
+        detail: "Loading, error and empty states. Every screen needs all three, not just the happy path." },
+      { name: "Forms, validation and routing",
+        detail: "Controlled inputs, client-side validation that mirrors the server's rules, and route structure." },
+      { name: "Follow our front-end conventions",
+        detail: "Match the component structure and styling in our existing front-end repo rather than inventing new ones." }
+    ],
+    gate: "A working front end against your API, including one screen that handles a server error gracefully."
+  },
+  {
+    title: "Security, quality and delivery",
+    goal: "Take an application from “runs on my machine” to something fit to deploy for a client.",
+    videos: [
+      { name: ".NET 8 Authentication with Identity in a Web API",
+        by: "Patrick God · about 20 minutes",
+        detail: "ASP.NET Core Identity with bearer tokens and cookies, tested through Swagger.",
+        url: "https://www.youtube.com/watch?v=8J3nuUegtL4" },
+      { name: "How to build a CI/CD pipeline with GitHub Actions and .NET",
+        by: "Milan Jovanović · written guide",
+        detail: "Build, test and deploy on every push. Read it, then set one up for your own project.",
+        url: "https://milanjovanovic.tech/blog/how-to-build-ci-cd-pipeline-with-github-actions-and-dotnet",
+        action: "Read" }
+    ],
+    tasks: [
+      { name: "Roles and policies",
+        detail: "Secure both the API endpoints and the front-end routes, and test that a user without the role is refused." },
+      { name: "Common vulnerabilities",
+        detail: "Injection, broken access control, secrets in source, over-permissive CORS. Know what you are defending against." },
+      { name: "Code review practice",
+        detail: "Focused commits, clear PR descriptions, and how to review someone else's code kindly and usefully." }
+    ],
+    gate: "Secure the full application and deploy it to a staging environment yourself, then write the runbook for it."
+  },
+  {
+    title: "First client work",
+    goal: "Move from exercises to real engagements, with support close by.",
+    videos: [],
+    tasks: [
+      { name: "Shadow a live engagement",
+        detail: "Sit in on calls, and read the codebase and the ticket history before you touch anything." },
+      { name: "Take small tickets end to end",
+        detail: "Bug fixes and minor features, from reading the ticket to merged pull request." },
+      { name: "Write client-facing updates",
+        detail: "Plain language, no jargon. Say clearly what is done, what is next and what is blocked." },
+      { name: "Ship to production",
+        detail: "With review and a mentor beside you the first time." }
+    ],
+    gate: "One ticket shipped to production, reviewed, and explained back to the team: what changed and why."
+  }
+];
+
+const KEY = "pinusx-rampup-v2";
+let done = {};
+try { done = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { done = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} }
+
+const plan = document.getElementById("plan");
+let total = 0;
+
+function addRow(sec, id, entry, isVideo){
+  total++;
+  const row = document.createElement("div");
+  row.className = "item" + (isVideo ? " video" : "") + (done[id] ? " ticked" : "");
+  row.innerHTML = `
+    <input type="checkbox" id="${id}" ${done[id] ? "checked" : ""}>
+    <div class="body">
+      <label for="${id}">${entry.name}</label>
+      ${entry.by ? `<div class="by">${entry.by}</div>` : ""}
+      ${entry.detail ? `<p>${entry.detail}</p>` : ""}
+    </div>
+    ${entry.url ? `<a class="open" href="${entry.url}" target="_blank" rel="noopener">${entry.action || "Watch"}</a>` : ""}`;
+  row.querySelector("input").addEventListener("change", e => {
+    if (e.target.checked) done[id] = true; else delete done[id];
+    row.classList.toggle("ticked", e.target.checked);
+    save(); update();
+  });
+  sec.appendChild(row);
+}
+
+STAGES.forEach((s, si) => {
+  const sec = document.createElement("section");
+  sec.className = "stage";
+  sec.dataset.stage = si;
+  sec.innerHTML = `
+    <div class="pin" aria-hidden="true">${si}</div>
+    <h2>Stage ${si}: ${s.title}</h2>
+    <p class="goal">${s.goal}</p>`;
+
+  if (s.videos.length){
+    const h = document.createElement("h3");
+    h.textContent = "Watch and code along";
+    sec.appendChild(h);
+    s.videos.forEach((v, vi) => addRow(sec, `s${si}v${vi}`, v, true));
+  }
+
+  const h = document.createElement("h3");
+  h.textContent = s.videos.length ? "Then practise" : "Do";
+  sec.appendChild(h);
+  s.tasks.forEach((t, ti) => addRow(sec, `s${si}t${ti}`, t, false));
+
+  const gate = document.createElement("div");
+  gate.className = "gate";
+  gate.innerHTML = `<b>REVIEW GATE</b>${s.gate}`;
+  sec.appendChild(gate);
+
+  plan.appendChild(sec);
+});
+
+document.getElementById("totalCount").textContent = total;
+
+function update(){
+  const n = document.querySelectorAll(".item input:checked").length;
+  document.getElementById("doneCount").textContent = n;
+  document.getElementById("railFill").style.width = (n / total * 100) + "%";
+
+  let open = -1;
+  document.querySelectorAll(".stage").forEach(sec => {
+    const all = [...sec.querySelectorAll("input")].every(b => b.checked);
+    sec.classList.toggle("sealed", all);
+    if (!all && open === -1) open = +sec.dataset.stage;
+  });
+
+  const msg = document.getElementById("stanceMsg");
+  if (n === total) msg.textContent = "Every stage cleared. You are running on your own now.";
+  else if (n === 0) msg.textContent = "Start at Stage 0. Get the environment running before anything else.";
+  else msg.textContent = `Currently on Stage ${open}: ${STAGES[open].title}.`;
+}
+update();
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("Clear every tick and start the plan again?")) return;
+  done = {}; save();
+  document.querySelectorAll(".item").forEach(r => {
+    r.classList.remove("ticked");
+    r.querySelector("input").checked = false;
+  });
+  update();
+});
+</script>
+</body>
+</html>
